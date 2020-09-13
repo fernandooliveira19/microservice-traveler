@@ -1,0 +1,18 @@
+language: bash
+service: docker
+before_install:
+  - . 
+  - echo "We are in the Docker folder!"
+script:  
+  - docker-compos build
+before_deploy:
+  - echo "${DOCKER_PASSWORD}" | docke login --username "${DOCKER_USERNAME}" --password-stdin
+deploy:
+  provider: script
+  script:
+    docker push fernandooliveira19/mysql-traveler-service;
+    docker push fernandooliveira19/traveler-service;
+  on:
+    branch: master
+notifications:
+  email: true    
