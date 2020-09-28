@@ -7,13 +7,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fernando.oliveira.traveler.repository.PhoneRepository;
+import com.fernando.oliveira.traveler.repository.TravelerRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -26,7 +40,7 @@ import com.fernando.oliveira.traveler.model.PageModel;
 import com.fernando.oliveira.traveler.model.PageRequestModel;
 import com.fernando.oliveira.traveler.service.TravelerService;
 
-@WebMvcTest(TravelerResource.class)
+@WebMvcTest(controllers = TravelerResource.class)
 @ActiveProfiles("test")
 public class TravelerResourceTest {
 
@@ -54,6 +68,12 @@ public class TravelerResourceTest {
 	
 	@MockBean
 	TravelerService travelerService;
+
+	@MockBean
+	TravelerRepository travelerRepository;
+
+	@MockBean
+	PhoneRepository phoneRepository;
 	
 	
 	@Test
