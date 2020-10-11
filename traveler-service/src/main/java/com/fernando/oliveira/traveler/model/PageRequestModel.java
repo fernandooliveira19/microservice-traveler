@@ -44,7 +44,7 @@ public class PageRequestModel {
 		
 		String [] properties = sort.split(",");
 		
-		for(String prop : properties) {
+ 		for(String prop : properties) {
 			if(prop.trim().length() > 0) {
 				String column = prop.trim();
 				

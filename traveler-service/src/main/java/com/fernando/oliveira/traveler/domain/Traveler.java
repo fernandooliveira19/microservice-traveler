@@ -5,12 +5,15 @@ import java.io.Serializable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.fernando.oliveira.traveler.domain.enums.Status;
 import com.fernando.oliveira.traveler.dto.TravelerDTO;
 
 import lombok.AllArgsConstructor;
@@ -20,7 +23,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity(name="traveler")
-@Table(name="TRAVELER" )
+@Table(name="traveler" )
 @Getter
 @Setter
 @Builder
@@ -43,6 +46,10 @@ public class Traveler implements Serializable{
 	
 	@Column(name="DOCUMENT")
 	private String document;
+
+	@Column(name="STATUS", nullable = false)
+	@Enumerated(EnumType.STRING)
+	private Status status;
 	
 	@OneToOne(mappedBy="traveler", cascade=CascadeType.ALL)
 	private Phone phone;
@@ -54,10 +61,18 @@ public class Traveler implements Serializable{
 									.name(name)
 									.email(email)
 									.document(document)
+									.status(convertStatus(status))
 									.prefixPhone(phone.getPrefix())
 									.numberPhone(phone.getNumber())
 									.build();
 		return travelerDTO;
+	}
+
+	private String convertStatus(Status status){
+		if(status != null){
+			return status.getCode();
+		}
+		return Status.ACTIVE.getCode();
 	}
 
 

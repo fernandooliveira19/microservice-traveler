@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
+import com.fernando.oliveira.traveler.domain.enums.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,8 +40,9 @@ public class TravelerServiceImpl implements TravelerService{
 	public Traveler save(Traveler traveler) {
 		
 		validate(traveler);
-		
+		traveler.setStatus(Status.ACTIVE);
 		Traveler createdTraveler = travelerRepository.save(traveler);
+
 		
 		createOrUpdatePhone(createdTraveler);
 
@@ -223,6 +225,15 @@ public class TravelerServiceImpl implements TravelerService{
 	public List<Traveler> findAllByOrderByName() {
 		
 		return travelerRepository.findAllByOrderByName();
+	}
+
+	public Traveler updateStatus(Traveler traveler) {
+		Traveler savedTraveler = findById(traveler.getId());
+		
+		savedTraveler.setStatus(traveler.getStatus());
+		
+		return travelerRepository.save(savedTraveler);
+		
 	}
 
 	

@@ -27,6 +27,8 @@ public interface TravelerService {
 	
 	public List<Traveler> findAllByOrderByName();
 
+	public Traveler updateStatus(Traveler travelerToUpdate);
+
 
 	
 }

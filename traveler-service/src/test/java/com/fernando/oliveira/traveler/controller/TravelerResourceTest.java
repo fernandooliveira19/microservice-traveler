@@ -53,6 +53,7 @@ public class TravelerResourceTest {
 	
 	private static final String TRAVELER_EMAIL= "traveler04@test.com";
 	private static final String TRAVELER_DOCUMENT= "444.444.444.-44";
+	private static final String INACTIVE = "I";
 	
 	
 	private static final String REQUEST_MAPPING = "/api/travelers";
@@ -247,6 +248,36 @@ public class TravelerResourceTest {
 				
 		
 		
+	}
+
+	@Test
+	public void shouldInactiveTravelerById() throws Exception{
+
+
+		TravelerDTO dto = TravelerDTO.builder().name(TRAVELER_NAME_1).email(TRAVELER_EMAIL).document(TRAVELER_DOCUMENT).prefixPhone(PHONE_PREFIX).numberPhone(PHONE_NUMBER).status(INACTIVE).build();
+
+		Traveler traveler = dto.convertToTraveler();
+		traveler.setId(TRAVELER_ID);
+
+		Mockito.when(travelerService.update(Mockito.any(Traveler.class))).thenReturn(traveler);
+
+		MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.patch(REQUEST_MAPPING + "/" + TRAVELER_ID)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.characterEncoding(ENCONDING)
+				.content(this.mapper.writeValueAsBytes(dto));
+
+		mockMvc.perform(builder)
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id", is(1)))
+				.andExpect(jsonPath("$.name", is(TRAVELER_NAME_1 )))
+				.andExpect(jsonPath("$.status", is(INACTIVE)))
+				.andExpect(MockMvcResultMatchers.content().string(this.mapper.writeValueAsString(traveler.convertToDTO())));
+
+
+
+
+
 	}
 	
 	
