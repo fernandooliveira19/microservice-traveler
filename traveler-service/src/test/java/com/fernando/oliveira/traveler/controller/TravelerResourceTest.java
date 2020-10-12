@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.fernando.oliveira.traveler.repository.PhoneRepository;
 import com.fernando.oliveira.traveler.repository.TravelerRepository;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -251,6 +252,7 @@ public class TravelerResourceTest {
 	}
 
 	@Test
+	@Disabled
 	public void shouldInactiveTravelerById() throws Exception{
 
 
