@@ -7,11 +7,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ApiIgnore
 public class PageModel<T> implements Serializable{
 	
 	/**

@@ -12,11 +12,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ApiIgnore
 public class PageRequestModel {
 
 	
@@ -44,7 +46,7 @@ public class PageRequestModel {
 		
 		String [] properties = sort.split(",");
 		
-		for(String prop : properties) {
+ 		for(String prop : properties) {
 			if(prop.trim().length() > 0) {
 				String column = prop.trim();
 				

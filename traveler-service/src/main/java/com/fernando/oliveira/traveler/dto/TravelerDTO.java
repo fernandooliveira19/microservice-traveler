@@ -1,16 +1,14 @@
 package com.fernando.oliveira.traveler.dto;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.Length;
 
 import com.fernando.oliveira.traveler.domain.Phone;
 import com.fernando.oliveira.traveler.domain.Traveler;
+import com.fernando.oliveira.traveler.domain.enums.Status;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -41,6 +39,9 @@ public class TravelerDTO {
 	
 	@ApiModelProperty(value= "Documento do viajante")
 	private String document;
+
+	@ApiModelProperty(value= "Status do viajante")
+	private String status;
 	
 	@ApiModelProperty(value= "DDD do telefone do viajante")
 	@NotNull(message="DDD é obrigatório")
@@ -54,14 +55,23 @@ public class TravelerDTO {
 	
 
 	public Traveler convertToTraveler() {
-		
+
 		Traveler traveler = Traveler.builder()
 								.name(name)
 								.email(email)
 								.document(document)
+								.status(convertToEnum(status))
 								.phone(buildPhone())
 								.build();
 		return traveler;
+	}
+
+	private Status convertToEnum(String code){
+
+		if(status != null) {
+			return Status.toEnum(code);
+		}
+		return Status.ACTIVE;
 	}
 	
 	private Phone buildPhone() {

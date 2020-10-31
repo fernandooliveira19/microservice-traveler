@@ -7,13 +7,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fernando.oliveira.traveler.repository.PhoneRepository;
+import com.fernando.oliveira.traveler.repository.TravelerRepository;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -26,7 +41,7 @@ import com.fernando.oliveira.traveler.model.PageModel;
 import com.fernando.oliveira.traveler.model.PageRequestModel;
 import com.fernando.oliveira.traveler.service.TravelerService;
 
-@WebMvcTest(TravelerResource.class)
+@WebMvcTest(controllers = TravelerResource.class)
 @ActiveProfiles("test")
 public class TravelerResourceTest {
 
@@ -39,10 +54,12 @@ public class TravelerResourceTest {
 	
 	private static final String TRAVELER_EMAIL= "traveler04@test.com";
 	private static final String TRAVELER_DOCUMENT= "444.444.444.-44";
+	private static final String INACTIVE = "I";
 	
 	
 	private static final String REQUEST_MAPPING = "/api/travelers";
 	private static final String SEARCH_MAPPING = "search";
+	private static final String FIND_TRAVELER = "find";
 	private static final String ENCONDING = "UTF-8"; 
 	
 
@@ -54,6 +71,12 @@ public class TravelerResourceTest {
 	
 	@MockBean
 	TravelerService travelerService;
+
+	@MockBean
+	TravelerRepository travelerRepository;
+
+	@MockBean
+	PhoneRepository phoneRepository;
 	
 	
 	@Test
@@ -163,13 +186,6 @@ public class TravelerResourceTest {
 		travelers.add(travelerDTO02);
 		PageModel<TravelerDTO> pageModel = new PageModel<TravelerDTO>(travelers.size(), 5, 1, travelers);
 		
-//		Map<String,String> params = new HashMap<String,String>();
-////		params.put("name", "ELER");
-//		params.put("page", "0");
-//		params.put("size", "5");
-//		params.put("sort", "-name");
-//		PageRequestModel pageRequestModel = new PageRequestModel(params);
-		
 		Mockito.when(travelerService.findAll(Mockito.any(PageRequestModel.class))).thenReturn(pageModel);
 		
 		MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get(REQUEST_MAPPING +"/page?name=ELER&page=0&size=5&sort=-name,email")
@@ -227,6 +243,55 @@ public class TravelerResourceTest {
 				
 		
 		
+	}
+
+	@Test
+	@Disabled
+	public void shouldInactiveTravelerById() throws Exception{
+
+
+		TravelerDTO dto = TravelerDTO.builder().name(TRAVELER_NAME_1).email(TRAVELER_EMAIL).document(TRAVELER_DOCUMENT).prefixPhone(PHONE_PREFIX).numberPhone(PHONE_NUMBER).status(INACTIVE).build();
+
+		Traveler traveler = dto.convertToTraveler();
+		traveler.setId(TRAVELER_ID);
+
+		Mockito.when(travelerService.findById(Mockito.anyLong())).thenReturn(traveler);
+
+		MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.patch(REQUEST_MAPPING + "/" + TRAVELER_ID)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.characterEncoding(ENCONDING)
+				.content(this.mapper.writeValueAsBytes(dto));
+
+		mockMvc.perform(builder)
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id", is(1)))
+				.andExpect(jsonPath("$.name", is(TRAVELER_NAME_1 )))
+				.andExpect(jsonPath("$.status", is(INACTIVE)))
+				.andExpect(MockMvcResultMatchers.content().string(this.mapper.writeValueAsString(traveler.convertToDTO())));
+
+	}
+
+	@Test
+	public void shouldReturnTravelersByName() throws Exception{
+
+		TravelerDTO dto = TravelerDTO.builder().name(TRAVELER_NAME_1).email(TRAVELER_EMAIL).document(TRAVELER_DOCUMENT).prefixPhone(PHONE_PREFIX).numberPhone(PHONE_NUMBER).build();
+		List<TravelerDTO> travelers = new ArrayList<TravelerDTO>();
+		travelers.add(dto);
+
+		Mockito.when(travelerService.findByNameContainingOrderByNameAsc(Mockito.anyString())).thenReturn(travelers);
+
+		MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get(REQUEST_MAPPING + "/" + FIND_TRAVELER +"?name=ELER")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.characterEncoding(ENCONDING);
+
+
+		mockMvc.perform(builder)
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].name", is(TRAVELER_NAME_1 )));
+
+
 	}
 	
 	

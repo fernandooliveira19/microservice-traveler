@@ -11,9 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.fernando.oliveira.traveler.domain.enums.Status;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.platform.engine.TestExecutionResult;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -77,12 +79,14 @@ public class TravelerServiceTest {
 		Phone phone = buildPhone(TRAVELER_PHONE_PREFIX, TRAVELER_PHONE_NUMBER);
 		Traveler travelerToSave = buildTraveler(TRAVELER_NAME, TRAVELER_EMAIL, phone);
 		Traveler savedTraveler = travelerToSave;
+		savedTraveler.setStatus(Status.ACTIVE);
 		savedTraveler.setId(1L);
 		Mockito.when(travelerRepository.save(travelerToSave)).thenReturn(savedTraveler);
 		
 		savedTraveler = travelerService.save(travelerToSave);
 		
 		Assertions.assertNotNull(savedTraveler.getId());
+		Assertions.assertEquals(Status.ACTIVE.getDescription(), savedTraveler.getStatus().getDescription());
 		verify(travelerRepository).save(travelerToSave);
 		
 	}
@@ -100,6 +104,7 @@ public class TravelerServiceTest {
 		savedTraveler = travelerService.save(travelerToSave);
 		
 		Assertions.assertNotNull(savedTraveler.getPhone().getTraveler());
+		Assertions.assertEquals(Status.ACTIVE.getDescription(), savedTraveler.getStatus().getDescription());
 		verify(phoneService).save(travelerToSave.getPhone());
 		
 		
@@ -311,7 +316,7 @@ public class TravelerServiceTest {
 	}
 	
 	@Test
-	public void shouldReturnTravelersByName() {
+	public void shouldReturnTravelersByNamePaginabled() {
 		
 		Map<String,String> params = new HashMap<String, String>();
 		params.put("page", FIRST_PAGE);
@@ -497,6 +502,50 @@ public class TravelerServiceTest {
 		Assertions.assertEquals(result.get(0).getName(),TRAVELER_NAME+"_01");
 		Assertions.assertEquals(result.get(1).getName(),TRAVELER_NAME+"_02");
 		Assertions.assertEquals(result.get(2).getName(),TRAVELER_NAME+"_03");
+		
+	}
+
+	@Test
+	public void shouldInactiveTraveler() {
+
+		Phone phone = buildPhone(TRAVELER_PHONE_PREFIX, TRAVELER_PHONE_NUMBER);
+		Traveler travelerToUpdate = buildTraveler(TRAVELER_NAME, TRAVELER_EMAIL, phone);
+		travelerToUpdate.setStatus(Status.INACTIVE);
+		travelerToUpdate.setId(1L);
+
+		Phone savedPhone = buildPhone(TRAVELER_PHONE_PREFIX, TRAVELER_PHONE_NUMBER);
+		Traveler savedTraveler = buildTraveler(TRAVELER_NAME, TRAVELER_EMAIL, savedPhone);
+		savedTraveler.setId(1L);
+
+		Mockito.when(travelerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(savedTraveler));
+
+
+		travelerService.updateStatus(travelerToUpdate);
+
+		Assertions.assertEquals(Status.INACTIVE,travelerToUpdate.getStatus());
+		verify(travelerRepository).save(travelerToUpdate);
+
+	}
+	
+	@Test
+	public void shouldReturnTravelersByName() {
+		
+		
+		Phone phone = buildPhone(TRAVELER_PHONE_PREFIX, TRAVELER_PHONE_NUMBER);
+		Traveler savedTraveler = buildTraveler(TRAVELER_NAME, TRAVELER_EMAIL, phone);
+		List<Traveler> travelers = Arrays.asList(savedTraveler);
+		String name = "ELER";
+		
+		Mockito.when(travelerRepository.findByNameContainingOrderByNameAsc(name)).thenReturn(travelers);
+		
+		
+		List<TravelerDTO> result = travelerService.findByNameContainingOrderByNameAsc(name);
+		
+		
+		Assertions.assertEquals(result.size(), 1);
+		
+		Assertions.assertEquals(result.get(0).getName(), TRAVELER_NAME);
+		
 		
 	}
 

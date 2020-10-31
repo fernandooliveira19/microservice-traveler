@@ -7,21 +7,28 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.fernando.oliveira.traveler.domain.Traveler;
+import org.springframework.test.context.web.WebAppConfiguration;
 
-@Sql(value="/load-db.sql", executionPhase=Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(value="/clear-db.sql", executionPhase=Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(value="classpath:load-db.sql", executionPhase=Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(value="classpath:clear-db.sql", executionPhase=Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
-@TestPropertySource("classpath:application-test.properties")
-@DataJpaTest
+@TestPropertySource(locations = "classpath:/application-test.properties")
+@EnableJpaRepositories(basePackages = "com.fernando.oliveira.traveler")
+@SpringBootTest
+@ActiveProfiles("test")
 public class TravelerRepositoryTest {
 	
 	private static final String TRAVELER_NAME= "TRAVELER 01";
@@ -50,17 +57,17 @@ public class TravelerRepositoryTest {
 	}
 	
 	@Test
-	public void shuoldReturnTravelerByPartOfName() {
+	public void shouldReturnTravelerByPartOfName() {
 		
 		Pageable pageable = PageRequest.of(1, 5);
 		Page<Traveler> result = travelerRepository.findByNameContainingOrderByNameAsc(PART_TRAVELER_NAME, pageable);
 		
-		Assertions.assertThat(result.getTotalElements()).isEqualTo(3);
+		Assertions.assertThat(result.getTotalElements()).isEqualTo(4);
 		
 	}
 	
 	@Test
-	public void shuoldNotReturnTravelerByPartOfName() {
+	public void shouldNotReturnTravelerByPartOfName() {
 		String name = NOT_FOUND_NAME;
 		Pageable pageable = PageRequest.of(1, 5);
 		Page<Traveler> result = travelerRepository.findByNameContainingOrderByNameAsc(name, pageable);
@@ -70,16 +77,36 @@ public class TravelerRepositoryTest {
 	}
 	
 	@Test
-	public void shuoldReturnTravelerListOrdenedByName() {
+	public void shouldReturnTravelerListOrdenedByName() {
 		
 		List<Traveler> result = travelerRepository.findAllByOrderByName();
 		
+		Assertions.assertThat(result.size()).isEqualTo(4);
+		Assertions.assertThat(result.get(0).getName()).isEqualTo("TRAVELER 01");
+		Assertions.assertThat(result.get(1).getName()).isEqualTo("TRAVELER 02");
+		Assertions.assertThat(result.get(2).getName()).isEqualTo("TRAVELER 03");
+		Assertions.assertThat(result.get(3).getName()).isEqualTo("TRAVELER 04");
+
+	}
+
+	@Test
+	public void shouldReturnActiveTravelerListOrdenedByName() {
+
+		List<Traveler> result = travelerRepository.findAllActiveTravelersOrderByName();
+
 		Assertions.assertThat(result.size()).isEqualTo(3);
 		Assertions.assertThat(result.get(0).getName()).isEqualTo("TRAVELER 01");
 		Assertions.assertThat(result.get(1).getName()).isEqualTo("TRAVELER 02");
 		Assertions.assertThat(result.get(2).getName()).isEqualTo("TRAVELER 03");
+	}
+	
+	@Test
+	public void shouldReturnTravelerByPartOfNameNotPageable() {
 		
 		
+		List<Traveler> result = travelerRepository.findByNameContainingOrderByNameAsc(PART_TRAVELER_NAME);
+		
+		Assertions.assertThat(result.size()).isEqualTo(4);
 		
 	}
 		
