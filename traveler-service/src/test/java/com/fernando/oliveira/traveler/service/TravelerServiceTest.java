@@ -316,7 +316,7 @@ public class TravelerServiceTest {
 	}
 	
 	@Test
-	public void shouldReturnTravelersByName() {
+	public void shouldReturnTravelersByNamePaginabled() {
 		
 		Map<String,String> params = new HashMap<String, String>();
 		params.put("page", FIRST_PAGE);
@@ -525,6 +525,28 @@ public class TravelerServiceTest {
 		Assertions.assertEquals(Status.INACTIVE,travelerToUpdate.getStatus());
 		verify(travelerRepository).save(travelerToUpdate);
 
+	}
+	
+	@Test
+	public void shouldReturnTravelersByName() {
+		
+		
+		Phone phone = buildPhone(TRAVELER_PHONE_PREFIX, TRAVELER_PHONE_NUMBER);
+		Traveler savedTraveler = buildTraveler(TRAVELER_NAME, TRAVELER_EMAIL, phone);
+		List<Traveler> travelers = Arrays.asList(savedTraveler);
+		String name = "ELER";
+		
+		Mockito.when(travelerRepository.findByNameContainingOrderByNameAsc(name)).thenReturn(travelers);
+		
+		
+		List<TravelerDTO> result = travelerService.findByNameContainingOrderByNameAsc(name);
+		
+		
+		Assertions.assertEquals(result.size(), 1);
+		
+		Assertions.assertEquals(result.get(0).getName(), TRAVELER_NAME);
+		
+		
 	}
 
 

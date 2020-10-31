@@ -87,7 +87,7 @@ public class TravelerResource {
 
 	}
 
-	@ApiOperation(value = "Realiza pesquisa de viajantes por nome")
+	@ApiOperation(value = "Realiza pesquisa paginada de viajantes por nome")
 	@ApiResponses(value = { 
 			@ApiResponse(code = 200, message = "Pesquisa retornou dados com sucesso"),
 			@ApiResponse(code = 403, message = "Você não possui permissão para acessar esse recurso"),
@@ -174,5 +174,19 @@ public class TravelerResource {
 		Traveler updatedTraveler = travelerService.updateStatus(travelerToUpdate);
 
 		return ResponseEntity.status(HttpStatus.OK).body(updatedTraveler.convertToDTO());
+	}
+
+	@ApiOperation(value = "Realiza pesquisa de viajantes por nome")
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Pesquisa retornou dados com sucesso"),
+			@ApiResponse(code = 403, message = "Você não possui permissão para acessar esse recurso"),
+			@ApiResponse(code = 404, message = "Pesquisa não retornou resultados"),
+			@ApiResponse(code = 500, message = "Ocorreu algum erro inesperado. Tente novamente mais tarde") })
+	@GetMapping("/find")
+	public ResponseEntity<List<TravelerDTO>> findByName(@RequestParam String name) {
+
+		List<TravelerDTO> result = travelerService.findByNameContainingOrderByNameAsc(name);
+
+		return ResponseEntity.status(HttpStatus.OK).body(result);
 	}
 }

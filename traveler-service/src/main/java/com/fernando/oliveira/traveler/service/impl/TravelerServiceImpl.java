@@ -235,6 +235,25 @@ public class TravelerServiceImpl implements TravelerService{
 		return travelerRepository.save(savedTraveler);
 		
 	}
+	
+	@Override
+	public List<TravelerDTO> findByNameContainingOrderByNameAsc(String name) {
+		
+		
+		List<Traveler> result = travelerRepository.findByNameContainingOrderByNameAsc(name);
+		
+		List<TravelerDTO> collect = result
+				.stream()
+				.map((e) -> e.convertToDTO())
+				.collect(Collectors.toList());
+		
+		if(collect.isEmpty()) {
+			throw new TravelerNotFoundException("Não foram encontrados resultados");
+		}
+		
+		
+		return collect;
+	}
 
 	
 

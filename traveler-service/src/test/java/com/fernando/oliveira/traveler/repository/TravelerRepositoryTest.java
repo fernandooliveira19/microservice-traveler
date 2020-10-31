@@ -99,6 +99,16 @@ public class TravelerRepositoryTest {
 		Assertions.assertThat(result.get(1).getName()).isEqualTo("TRAVELER 02");
 		Assertions.assertThat(result.get(2).getName()).isEqualTo("TRAVELER 03");
 	}
+	
+	@Test
+	public void shouldReturnTravelerByPartOfNameNotPageable() {
+		
+		
+		List<Traveler> result = travelerRepository.findByNameContainingOrderByNameAsc(PART_TRAVELER_NAME);
+		
+		Assertions.assertThat(result.size()).isEqualTo(4);
+		
+	}
 		
 
 }

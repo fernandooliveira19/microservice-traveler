@@ -59,6 +59,7 @@ public class TravelerResourceTest {
 	
 	private static final String REQUEST_MAPPING = "/api/travelers";
 	private static final String SEARCH_MAPPING = "search";
+	private static final String FIND_TRAVELER = "find";
 	private static final String ENCONDING = "UTF-8"; 
 	
 
@@ -185,13 +186,6 @@ public class TravelerResourceTest {
 		travelers.add(travelerDTO02);
 		PageModel<TravelerDTO> pageModel = new PageModel<TravelerDTO>(travelers.size(), 5, 1, travelers);
 		
-//		Map<String,String> params = new HashMap<String,String>();
-////		params.put("name", "ELER");
-//		params.put("page", "0");
-//		params.put("size", "5");
-//		params.put("sort", "-name");
-//		PageRequestModel pageRequestModel = new PageRequestModel(params);
-		
 		Mockito.when(travelerService.findAll(Mockito.any(PageRequestModel.class))).thenReturn(pageModel);
 		
 		MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get(REQUEST_MAPPING +"/page?name=ELER&page=0&size=5&sort=-name,email")
@@ -261,7 +255,7 @@ public class TravelerResourceTest {
 		Traveler traveler = dto.convertToTraveler();
 		traveler.setId(TRAVELER_ID);
 
-		Mockito.when(travelerService.update(Mockito.any(Traveler.class))).thenReturn(traveler);
+		Mockito.when(travelerService.findById(Mockito.anyLong())).thenReturn(traveler);
 
 		MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.patch(REQUEST_MAPPING + "/" + TRAVELER_ID)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -276,8 +270,26 @@ public class TravelerResourceTest {
 				.andExpect(jsonPath("$.status", is(INACTIVE)))
 				.andExpect(MockMvcResultMatchers.content().string(this.mapper.writeValueAsString(traveler.convertToDTO())));
 
+	}
+
+	@Test
+	public void shouldReturnTravelersByName() throws Exception{
+
+		TravelerDTO dto = TravelerDTO.builder().name(TRAVELER_NAME_1).email(TRAVELER_EMAIL).document(TRAVELER_DOCUMENT).prefixPhone(PHONE_PREFIX).numberPhone(PHONE_NUMBER).build();
+		List<TravelerDTO> travelers = new ArrayList<TravelerDTO>();
+		travelers.add(dto);
+
+		Mockito.when(travelerService.findByNameContainingOrderByNameAsc(Mockito.anyString())).thenReturn(travelers);
+
+		MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get(REQUEST_MAPPING + "/" + FIND_TRAVELER +"?name=ELER")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.characterEncoding(ENCONDING);
 
 
+		mockMvc.perform(builder)
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].name", is(TRAVELER_NAME_1 )));
 
 
 	}
